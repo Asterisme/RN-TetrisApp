@@ -162,7 +162,7 @@ tetris-app/
 
 | 阶段 | 名称 | 核心产出 | 里程碑 | 状态 |
 |---|---|---|---|---|
-| Phase 1 | [项目启动与环境搭建](./phases/phase-1-项目启动与环境搭建.md) | Expo 骨架 + Jest 环境 + 目录结构 | M1 | 未开始 |
+| Phase 1 | [项目启动与环境搭建](./phases/phase-1-项目启动与环境搭建.md) | Expo 骨架 + Jest 环境 + 目录结构 | M1 | ✅ 已完成 2026-09-23 |
 | Phase 2 | [游戏引擎核心](./phases/phase-2-游戏引擎核心.md) | 纯 TS 引擎全量实现 + 单测 | M2 | 未开始 |
 | Phase 3 | [状态桥与渲染壳](./phases/phase-3-状态桥与渲染壳.md) | Zustand + Board 渲染 + 临时按钮操控 | M3 | 未开始 |
 | Phase 4 | [手势交互与完整闭环](./phases/phase-4-手势交互与完整闭环.md) | 手势 + 暂停/恢复 + 最高分 + 双端适配 | M4 | 未开始 |
@@ -186,12 +186,13 @@ tetris-app/
    - git commit（文档与代码同一次提交）。
 5. **新增阶段或重大变更**：从 `templates/phase-template.md` 复制新文档，并在本文件 §6 登记。
 
-**当前状态速览**：Phase 1 未开始 · 无已完成里程碑 · 最近更新 2026-09-23
+**当前状态速览**：Phase 1 已完成（M1 通过，2026-09-23）· 下一阶段 Phase 2 · 最近更新 2026-09-23
 
 ---
 
-## 8. 环境与运行（随 Phase 1 填充）
+## 8. 环境与运行
 
-- 初始化命令：待 Phase 1 执行后填写
-- 启动开发：`npx expo start`（待验证）
-- 运行测试：`npm test`（待验证）
+- 初始化：`npx create-expo-app@latest tetris-app --template blank-typescript`（Expo ~57.0.24 / RN 0.86.3 / TS 6.0）
+- 启动开发：`CI=1 npx expo start`（Expo 57 已移除 `--no-open`；CI=1 模式不自动打开）
+- 类型检查：`npm run typecheck`
+- 运行测试：`npm test`（ts-jest + node 环境，`@engine/*` 别名已同时配置于 jest.config.js 与 tsconfig paths）

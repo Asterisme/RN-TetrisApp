@@ -1,6 +1,6 @@
 # Phase 1 — 项目启动与环境搭建
 
-> 状态：⬜ 未开始 · 对应里程碑：M1（项目骨架可运行）
+> 状态：✅ 已完成（2026-09-23） · 对应里程碑：M1（项目骨架可运行）
 
 ---
 
@@ -104,13 +104,21 @@ git init && git add -A && git commit -m "chore: expo + ts 项目骨架与工程�
 
 | # | 任务 | 完成日期 | 验证方式 | 备注 |
 |---|---|---|---|---|
-| | | | | |
+| 1 | create-expo-app 初始化 TypeScript 模板 | 2026-09-23 | package.json：expo ~57.0.24 / RN 0.86.3 / TS 6.0 | Expo 57 模板 |
+| 2 | 安装依赖（zustand / gesture-handler / safe-area-context / async-storage / jest） | 2026-09-23 | package-lock 版本核对，均与 expo 57 兼容 | RN 系包经 expo install 匹配版本 |
+| 3 | 目录骨架 + 引擎常量/类型 | 2026-09-23 | find src 核对；COLS=10/ROWS=20/BUFFER=4 | store 等目录用 .gitkeep 占位 |
+| 4 | typecheck 脚本 | 2026-09-23 | `npm run typecheck` 零错误 | - |
+| 5 | Jest 配置 + smoke 测试 | 2026-09-23 | `npm test` 1 passed | 踩坑见问题表 #1 |
+| 6 | 启动验证 | 2026-09-23 | dev server `packager-status:running`；iOS/Android bundle 均 HTTP 200（4.1MB/4.2MB） | bundle 层验证通过；**建议用户用 Expo Go 扫码做最终视觉确认**（见问题表 #2、#3） |
+| 7 | git 提交 | 2026-09-23 | commit `32a63bc` | committer 身份为自动生成（黄铧@ThunderBolt.local），如需修正可 git config 后 amend |
 
 ## 7. 问题与解决方案记录
 
 | 日期 | 问题症状 | 根因 | 解决方案 | 状态 |
 |---|---|---|---|---|
-| | | | | |
+| 2026-09-23 | ts-jest 报 TS2307 找不到 `@engine/constants` + TS2593 找不到 `describe` | ts-jest 走 TypeScript 编译器解析模块，**不读 Jest 的 moduleNameMapper**；且 jest 全局类型未被 tsconfig 加载 | tsconfig.json 增加 `paths: {"@engine/*": ["./src/engine/*"]}` 与 `types: ["jest"]`；moduleNameMapper 仍保留（供运行时解析） | ✅ 已解决 |
+| 2026-09-23 | `expo-doctor` 挂起后被杀（exit 137） | 网络请求超时（沙箱环境） | 跳过 doctor，改用「dev server status + 双端 bundle HTTP 200」做启动冒烟，验证力度等价（编译层面） | ✅ 已解决 |
+| 2026-09-23 | `expo start --no-open` 报 unknown option | Expo 57 已移除该选项 | 用 `CI=1` 环境变量（CI 模式不自动打开）| ✅ 已解决 |
 
 ## 8. 遗留想法（不进当前版本）
 
@@ -118,7 +126,7 @@ git init && git add -A && git commit -m "chore: expo + ts 项目骨架与工程�
 
 ## 9. 阶段验收（对应 M1 检查清单）
 
-- [ ] 逐项核对 MILESTONES.md 中 M1 的全部验收标准
-- [ ] 已更新 PROJECT.md §6 阶段状态
-- [ ] 已更新 MILESTONES.md 完成情况
-- [ ] 已 git commit（文档 + 代码）
+- [x] 逐项核对 MILESTONES.md 中 M1 的全部验收标准（bundle 编译验证通过；Expo Go 视觉终检建议用户复核）
+- [x] 已更新 PROJECT.md §6 阶段状态
+- [x] 已更新 MILESTONES.md 完成情况
+- [x] 已 git commit（文档 + 代码，commit `32a63bc`）

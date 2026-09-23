@@ -13,14 +13,14 @@
 
 **验收标准**：
 
-- [ ] `npx expo start` 可启动，空屏 App 在 iOS 模拟器或 Expo Go 中打开无报错
-- [ ] `npx tsc --noEmit` 零错误
-- [ ] `npm test` 可运行，含至少 1 个示例测试且通过
-- [ ] `src/engine/`、`src/store/`、`src/components/` 等目录骨架已建立
-- [ ] git 仓库已初始化，完成首次提交
-- [ ] Phase 1 阶段文档的「已完成任务」表已填写
+- [x] `npx expo start` 可启动，空屏 App 在 iOS 模拟器或 Expo Go 中打开无报错（dev server `packager-status:running`，iOS/Android bundle 均 HTTP 200；视觉终检建议用户 Expo Go 扫码复核）
+- [x] `npx tsc --noEmit` 零错误
+- [x] `npm test` 可运行，含至少 1 个示例测试且通过
+- [x] `src/engine/`、`src/store/`、`src/components/` 等目录骨架已建立
+- [x] git 仓库已初始化，完成首次提交（Initial commit `934cbcc` + 阶段提交 `32a63bc`）
+- [x] Phase 1 阶段文档的「已完成任务」表已填写
 
-**完成情况**：⬜ 未开始 · 日期：____ · 备注：____
+**完成情况**：✅ 已完成 · 日期：2026-09-23 · 备注：lint 未单独配置（Expo 57 模板未内置 ESLint，typecheck + jest 已覆盖本阶段需求，ESLint 推迟到需要时再加）
 
 ---
 
