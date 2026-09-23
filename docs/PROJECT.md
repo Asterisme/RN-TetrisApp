@@ -126,6 +126,7 @@ tetris-app/
 ├── docs/                        # 项目文档（本体系）
 │   ├── PROJECT.md               # 主文档（本文件）
 │   ├── MILESTONES.md            # 里程碑检查清单
+│   ├── GIT.md                   # Git 协作规范与操作手册
 │   ├── phases/                  # 各阶段开发文档
 │   │   ├── phase-1-项目启动与环境搭建.md
 │   │   ├── phase-2-游戏引擎核心.md
