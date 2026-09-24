@@ -1,6 +1,6 @@
 # Phase 3 — 状态桥与渲染壳
 
-> 状态：⬜ 未开始 · 对应里程碑：M3（模拟器可玩）
+> 状态：🔄 代码侧完成（2026-09-24），待用户在模拟器/Expo Go 中视觉验收 · 对应里程碑：M3（模拟器可玩）
 
 ---
 
@@ -102,13 +102,23 @@ function useGameEngine() {
 
 | # | 任务 | 完成日期 | 验证方式 | 备注 |
 |---|---|---|---|---|
-| | | | | |
+| 1 | gameStore.ts + 引擎单例 | 2026-09-24 | typecheck | store 只存快照 + ghostY + highScore；引擎单例在 src/store/engine.ts（store 外） |
+| 2 | useGameEngine hook | 2026-09-24 | typecheck + bundle 编译 | rAF 循环 + dt 钳制 100ms + 脏检查跳过无变化帧（引用比较） |
+| 3 | Board 组件（View 矩阵） | 2026-09-24 | bundle 编译 | 可见区棋盘 + 当前方块 + 幽灵三层叠加；cell 尺寸随屏幕自适应 |
+| 4 | GhostView（并入 Board） | 2026-09-24 | bundle 编译 | 幽灵以 30% 透明度渲染，与实体块重叠格自动去重 |
+| 5 | NextPanel | 2026-09-24 | bundle 编译 | 用 SHAPES 渲染缩略 3 个预览 |
+| 6 | HUD | 2026-09-24 | bundle 编译 | 字段级精确订阅（s => s.score 等）；BEST 暂取 max(highScore, score) |
+| 7 | GameScreen 组装 + 临时按钮 | 2026-09-24 | bundle 编译 | ready/playing/paused/over 四态条件渲染；不引入导航库 |
+| 8 | Game Over 弹层 + 再来一局 | 2026-09-24 | bundle 编译 | RN Modal + restart（reset+start） |
+| 9 | 模拟器完整一局冒烟 | - | **待用户执行** | 见下「验收指引」 |
+
+**验收指引（用户执行）**：项目目录运行 `npx expo start`，模拟器按 `i`（或手机 Expo Go 扫码）→ 点「开始游戏」→ 用底部按钮（◀ ▼ ▶ ⟳ ⤓ + ❚❚）完整玩一局至 Game Over → 点「再来一局」。异常现象记入本文件 §7。
 
 ## 7. 问题与解决方案记录
 
 | 日期 | 问题症状 | 根因 | 解决方案 | 状态 |
 |---|---|---|---|---|
-| | | | | |
+| 2026-09-24 | typecheck 报 `absoluteFillObject` 不存在 | RN 0.86 移除了该属性（仅剩 absoluteFill 注册样式，不可 spread） | 手写 position/top/left/right/bottom 四属性 | ✅ 已解决 |
 
 ## 8. 遗留想法（不进当前版本）
 
