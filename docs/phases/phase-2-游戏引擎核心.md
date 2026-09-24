@@ -1,6 +1,6 @@
 # Phase 2 — 游戏引擎核心
 
-> 状态：⬜ 未开始 · 对应里程碑：M2（引擎全量可用）
+> 状态：✅ 已完成（2026-09-24） · 对应里程碑：M2（引擎全量可用）
 > 本阶段**完全不碰 RN**，所有代码在 `src/engine/` 纯 TS 环境中开发并用 Jest 验证。
 
 ---
@@ -139,13 +139,22 @@ export class GameEngine {
 
 | # | 任务 | 完成日期 | 验证方式 | 备注 |
 |---|---|---|---|---|
-| | | | | |
+| 1 | types.ts + constants.ts | 2026-09-23 | typecheck 零错误 | 踢墙表已换算为 y 向下坐标系（标准表 dy 取反），并在注释中标注 |
+| 2 | bag.ts 7-bag | 2026-09-23 | bag.test 4 用例 | rng 可注入，测试可复现 |
+| 3 | collision.ts | 2026-09-23 | collision.test 7 用例 | 含生成区上方溢出语义 |
+| 4 | rotation.ts SRS | 2026-09-23 | rotation.test 6 用例 | 踢墙生效用例：I 块贴墙偏移到 x=0；全围困返回 null |
+| 5 | board.ts + scoring.ts | 2026-09-23 | board.test 12 用例 | 含非连续行消除、四消（Tetris） |
+| 6 | GameEngine.ts | 2026-09-24 | engine.test 12 用例 + 模拟冒烟 2 用例 | 状态机/命令/事件流/lock-out/暂停恢复全覆盖 |
+| 7 | 全量单测 | 2026-09-24 | `npm test`：6 套件 45 用例全绿 | - |
+| 8 | Node 模拟一局 | 2026-09-24 | simulate（engine.test 内 2 个 describe） | 实现为测试文件而非 scripts/ 脚本，理由见问题表 #1 |
+| 9 | 覆盖率验证 | 2026-09-24 | `npx jest --coverage` | 语句 99.08% / 分支 90.78% / 函数与行 100%，≥90% 达标 |
 
 ## 7. 问题与解决方案记录
 
 | 日期 | 问题症状 | 根因 | 解决方案 | 状态 |
 |---|---|---|---|---|
-| | | | | |
+| 2026-09-24 | Jest 报 helpers.ts "must contain at least one test" | 默认 testMatch 会把 `__tests__/` 下**所有** .ts 文件当测试套件 | jest.config.js 显式 `testMatch: ['**/*.test.ts']` | ✅ 已解决 |
+| 2026-09-24 | board.test 报 TS2588（const 重新赋值） | 测试内对棋盘变量复用 let/const 混用 | 改 let | ✅ 已解决 |
 
 ## 8. 遗留想法（不进当前版本）
 
@@ -153,7 +162,7 @@ export class GameEngine {
 
 ## 9. 阶段验收（对应 M2 检查清单）
 
-- [ ] 逐项核对 MILESTONES.md 中 M2 的全部验收标准
-- [ ] 已更新 PROJECT.md §6 阶段状态
-- [ ] 已更新 MILESTONES.md 完成情况
-- [ ] 已 git commit（文档 + 代码）
+- [x] 逐项核对 MILESTONES.md 中 M2 的全部验收标准
+- [x] 已更新 PROJECT.md §6 阶段状态
+- [x] 已更新 MILESTONES.md 完成情况
+- [x] 已 git commit（文档 + 代码）
