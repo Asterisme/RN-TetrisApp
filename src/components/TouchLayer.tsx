@@ -29,12 +29,12 @@ interface Props {
 }
 
 export function TouchLayer({ cell, sensitivity, dispatch, children }: Props) {
-  const drag = useRef({ lastX: 0, lastY: 0, moved: false });
+  const drag = useRef({ lastX: 0, lastY: 0, accX: 0, accY: 0, moved: false });
 
   const pan = Gesture.Pan()
     .runOnJS(true)
     .onBegin(() => {
-      drag.current = { lastX: 0, lastY: 0, moved: false };
+      drag.current = { lastX: 0, lastY: 0, accX: 0, accY: 0, moved: false };
     })
     .onUpdate((e) => {
       const step = cell * STEP_FACTOR[sensitivity];
@@ -42,8 +42,8 @@ export function TouchLayer({ cell, sensitivity, dispatch, children }: Props) {
       const dY = e.translationY - drag.current.lastY;
       drag.current.lastX = e.translationX;
       drag.current.lastY = e.translationY;
-      drag.current.accX = (drag.current.accX ?? 0) + dX;
-      drag.current.accY = (drag.current.accY ?? 0) + dY;
+      drag.current.accX += dX;
+      drag.current.accY += dY;
 
       // 水平：累计够一格就移一格（连续拖动多格）
       while (Math.abs(drag.current.accX) >= step) {
@@ -65,7 +65,7 @@ export function TouchLayer({ cell, sensitivity, dispatch, children }: Props) {
       ) {
         dispatch('hardDrop');
       }
-      drag.current = { lastX: 0, lastY: 0, moved: false };
+      drag.current = { lastX: 0, lastY: 0, accX: 0, accY: 0, moved: false };
     });
 
   const tap = Gesture.Tap()

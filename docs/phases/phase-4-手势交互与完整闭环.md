@@ -111,7 +111,8 @@ Android `BackHandler.addEventListener('hardwareBackPress', ...)`：playing 时�
 
 | 日期 | 问题症状 | 根因 | 解决方案 | 状态 |
 |---|---|---|---|---|
-| | | | | |
+| 2026-09-28 | 启动即红屏 `undefined is not a function` | App.tsx 误将 `useEffect` 从 `react-native` 导入（应为 `react`）；react-native 运行时不导出该 Hook。TS 未报错是因为 RN 类型声明重导出了 React hooks（盲区） | 改为 `import { useEffect } from 'react'`；全仓扫描确认无同类误导入 | ✅ 已解决 |
+| 2026-09-28 | typecheck 曾漏报 TouchLayer 的 TS2339（ref 缺 accX/accY 字段） | 之前用 `\| tail` 管道检查导致退出码取的是 tail 的、错误行被截断 | ref 初始值补全 accX/accY 字段；typecheck 改为直接检查退出码不截断输出 | ✅ 已解决 |
 
 ## 8. 遗留想法（不进当前版本）
 
