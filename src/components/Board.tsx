@@ -1,8 +1,9 @@
 // Board：可见区棋盘（View 矩阵）+ 当前方块 + 幽灵方块 三层叠加
 import React, { useMemo } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { BUFFER, COLS, ROWS } from '@engine/constants';
 import { useGameStore } from '../store/gameStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { BOARD_BORDER, CELL_EMPTY, PIECE_COLORS } from './colors';
 
 interface OverlayCell {
@@ -13,17 +14,11 @@ interface OverlayCell {
   ghost: boolean;
 }
 
-export function Board() {
+export function Board({ cell }: { cell: number }) {
   const board = useGameStore((s) => s.board);
   const current = useGameStore((s) => s.current);
   const ghostY = useGameStore((s) => s.ghostY);
-  const { width, height } = useWindowDimensions();
-
-  // 自适应格子尺寸：为左右面板各留 ~120pt、上下留 ~120pt
-  const cell = Math.max(
-    12,
-    Math.floor(Math.min((width - 260) / COLS, (height - 220) / ROWS)),
-  );
+  const ghostEnabled = useSettingsStore((s) => s.ghostEnabled);
 
   const visible = useMemo(() => board.slice(BUFFER, BUFFER + ROWS), [board]);
 
@@ -37,7 +32,7 @@ export function Board() {
         if (by >= 0) {
           cells.push({ key: `c${dy}-${dx}`, x: current.x + dx, y: by, color: PIECE_COLORS[current.type], ghost: false });
         }
-        if (ghostY != null) {
+        if (ghostEnabled && ghostY != null) {
           const gy = ghostY + dy - BUFFER;
           if (gy >= 0 && gy !== by) {
             cells.push({ key: `g${dy}-${dx}`, x: current.x + dx, y: gy, color: PIECE_COLORS[current.type], ghost: true });
@@ -46,7 +41,7 @@ export function Board() {
       });
     });
     return cells;
-  }, [current, ghostY]);
+  }, [current, ghostY, ghostEnabled]);
 
   return (
     <View style={[styles.frame, { width: COLS * cell + 2, height: ROWS * cell + 2 }]}>

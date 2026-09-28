@@ -1,6 +1,7 @@
 // useGameEngine：rAF 固定步长循环 + 引擎↔Store 快照同步（脏检查跳过无变化帧）
 import { useCallback, useEffect, useRef } from 'react';
 import type { Command, EngineEvent } from '@engine/types';
+import { saveHighScore } from '../utils/storage';
 import { gameEngine } from '../store/engine';
 import { useGameStore } from '../store/gameStore';
 
@@ -21,8 +22,17 @@ export function useGameEngine() {
   const prev = useRef({ board: null as unknown, current: null as unknown, key: '' });
 
   const handleEvents = useCallback(
-    (_events: EngineEvent[]) => {
-      // Phase 4 在此消费 over 事件落最高分、cleared 事件驱动消行动画
+    (events: EngineEvent[]) => {
+      for (const e of events) {
+        if (e.type === 'over') {
+          // 游戏结束：刷新本地最高分并落盘（存储失败静默降级）
+          const { score, highScore, setHighScore } = useGameStore.getState();
+          if (score > highScore) {
+            setHighScore(score);
+            void saveHighScore(score);
+          }
+        }
+      }
     },
     [],
   );

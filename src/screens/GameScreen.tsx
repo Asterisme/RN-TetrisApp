@@ -1,22 +1,37 @@
-// GameScreen：主游戏界面（v1 条件渲染三个 phase，不引入导航库）
-import React from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+// GameScreen：主游戏界面（v1 条件渲染，不引入导航库）
+import React, { useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { COLS, ROWS } from '@engine/constants';
 import { useGameStore } from '../store/gameStore';
+import { useSettingsStore } from '../store/settingsStore';
 import { Board } from '../components/Board';
 import { HUD } from '../components/HUD';
 import { NextPanel } from '../components/NextPanel';
 import { TempControls } from '../components/TempControls';
+import { TouchLayer } from '../components/TouchLayer';
 import { useGameEngine } from '../hooks/useGameEngine';
+import { useGameLifecycle } from '../hooks/useGameLifecycle';
+import { SettingsScreen } from './SettingsScreen';
 import { SCREEN_BG, TEXT_DIM, TEXT_MAIN } from '../components/colors';
 
 export function GameScreen() {
   const phase = useGameStore((s) => s.phase);
   const score = useGameStore((s) => s.score);
+  const sensitivity = useSettingsStore((s) => s.sensitivity);
   const { start, restart, pause, resume, dispatch } = useGameEngine();
+  useGameLifecycle(pause);
 
+  const [view, setView] = useState<'menu' | 'settings'>('menu');
+  const { width, height } = useWindowDimensions();
+  // 与 Board 共用的格子尺寸：为左右面板各留 ~120pt、上下留 ~150pt
+  const cell = Math.max(12, Math.floor(Math.min((width - 260) / COLS, (height - 150) / ROWS)));
+
+  // ready 状态下的菜单/设置切换
   if (phase === 'ready') {
-    return (
+    return view === 'settings' ? (
+      <SettingsScreen onBack={() => setView('menu')} />
+    ) : (
       <SafeAreaView style={styles.safe}>
         <View style={styles.center}>
           <Text style={styles.title}>RN TETRIS</Text>
@@ -24,6 +39,10 @@ export function GameScreen() {
           <Pressable style={({ pressed }) => [styles.primaryBtn, pressed && styles.pressed]} onPress={start}>
             <Text style={styles.primaryLabel}>开始游戏</Text>
           </Pressable>
+          <Pressable style={({ pressed }) => [styles.secondaryBtn, pressed && styles.pressed]} onPress={() => setView('settings')}>
+            <Text style={styles.secondaryLabel}>设置</Text>
+          </Pressable>
+          <Text style={styles.hint}>点击旋转 · 左右滑移动 · 下滑软降 · 快滑硬降</Text>
         </View>
       </SafeAreaView>
     );
@@ -33,7 +52,9 @@ export function GameScreen() {
     <SafeAreaView style={styles.safe}>
       <View style={styles.top}>
         <HUD />
-        <Board />
+        <TouchLayer cell={cell} sensitivity={sensitivity} dispatch={dispatch}>
+          <Board cell={cell} />
+        </TouchLayer>
         <NextPanel />
       </View>
 
@@ -142,6 +163,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 36,
   },
+  secondaryBtn: {
+    borderColor: '#374151',
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 36,
+  },
   pressed: {
     opacity: 0.7,
   },
@@ -149,5 +177,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '500',
+  },
+  secondaryLabel: {
+    color: TEXT_MAIN,
+    fontSize: 15,
   },
 });

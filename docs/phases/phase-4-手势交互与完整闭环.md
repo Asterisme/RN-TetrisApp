@@ -1,6 +1,6 @@
 # Phase 4 — 手势交互与完整闭环
 
-> 状态：⬜ 未开始 · 对应里程碑：M4（双端真机完整闭环）
+> 状态：🔄 代码侧完成（2026-09-28），待双端真机回归验收 · 对应里程碑：M4（双端真机完整闭环）
 
 ---
 
@@ -89,7 +89,23 @@ Android `BackHandler.addEventListener('hardwareBackPress', ...)`：playing 时�
 
 | # | 任务 | 完成日期 | 验证方式 | 备注 |
 |---|---|---|---|---|
-| | | | | |
+| 1 | TouchLayer 手势识别 | 2026-09-28 | typecheck + bundle 编译 | gesture-handler Pan+Tap，runOnJS(true) 模式；Exclusive 组合（拖动优先于点击） |
+| 2 | 移动手势量化 + 灵敏度档位 | 2026-09-28 | typecheck | 累计位移/格步长（low 1.4×/medium 1.0×/high 0.65× cell）；硬降阈值：位移>40 且速度>1200 |
+| 3 | 暂停/恢复 | 2026-09-24（Phase 3 已建） | - | 本阶段补充后台自动暂停与返回键接管 |
+| 4 | useGameLifecycle 后台自动暂停 | 2026-09-28 | typecheck | AppState 非 active 且 playing → pause；回前台保持暂停 |
+| 5 | Android 返回键接管 | 2026-09-28 | typecheck | playing → 暂停；paused → 拦截；其余走系统默认 |
+| 6 | storage.ts 封装 | 2026-09-28 | typecheck | 最高分 + 设置读写，失败静默降级不阻塞游戏 |
+| 7 | SettingsScreen | 2026-09-28 | typecheck + bundle | 幽灵方块 Switch + 灵敏度三档，改动即持久化；从开始页进入 |
+| 8 | SafeArea 适配 | 2026-09-24（Phase 3 已建） | bundle | SafeAreaProvider + SafeAreaView 全覆盖 |
+| 9 | 双端真机回归 | - | **待用户执行** | 见下方验收清单 |
+
+**验收清单（用户执行，双端各跑一遍）**：
+1. Expo Go 打开 → 开始游戏 → 手势玩一局：点击旋转 / 左右滑移动 / 慢滑软降 / 快滑硬降
+2. 误触率：正常操作不应频繁误旋转/误硬降（可在设置页调灵敏度）
+3. 顶部 ❚❚ 暂停 → 继续；切后台 App 自动暂停，回来需手动继续
+4. Android：游戏中按返回键 → 出现暂停遮罩（不退出）
+5. Game Over 后杀掉 App 重开 → BEST 显示上局分数（最高分持久化）
+6. 设置页关幽灵方块 → 游戏中落点预览消失；重进 App 设置仍保留
 
 ## 7. 问题与解决方案记录
 
