@@ -23,9 +23,16 @@ export function GameScreen() {
   useGameLifecycle(pause);
 
   const [view, setView] = useState<'menu' | 'settings'>('menu');
+  const [showSettings, setShowSettings] = useState(false); // 游戏中打开设置
   const { width, height } = useWindowDimensions();
   // 与 Board 共用的格子尺寸：为左右面板各留 ~120pt、上下留 ~150pt
   const cell = Math.max(12, Math.floor(Math.min((width - 260) / COLS, (height - 150) / ROWS)));
+
+  // 游戏中打开设置：先暂停，返回后回到（暂停中的）游戏
+  const openSettings = () => {
+    if (phase === 'playing') pause();
+    setShowSettings(true);
+  };
 
   // ready 状态下的菜单/设置切换
   if (phase === 'ready') {
@@ -46,6 +53,10 @@ export function GameScreen() {
         </View>
       </SafeAreaView>
     );
+  }
+
+  if (showSettings) {
+    return <SettingsScreen onBack={() => setShowSettings(false)} />;
   }
 
   return (
@@ -71,13 +82,23 @@ export function GameScreen() {
         </View>
       )}
 
-      {/* 右上角暂停/继续键：放在 overlay 之后渲染，暂停遮罩下仍可点按 */}
-      <Pressable
-        style={({ pressed }) => [styles.pauseCorner, phase === 'paused' && styles.pauseActive, pressed && styles.pressed]}
-        onPress={phase === 'paused' ? resume : pause}
-      >
-        <Text style={styles.pauseLabel}>{phase === 'paused' ? '▶' : '❚❚'}</Text>
-      </Pressable>
+      {/* 右上角竖排：⚙设置（游戏中打开并自动暂停）+ ❚❚暂停/继续；置于遮罩之上可点按 */}
+      {phase !== 'over' && (
+        <View style={styles.cornerColumn}>
+          <Pressable
+            style={({ pressed }) => [styles.cornerBtn, pressed && styles.pressed]}
+            onPress={openSettings}
+          >
+            <Text style={styles.pauseLabel}>⚙</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.cornerBtn, phase === 'paused' && styles.pauseActive, pressed && styles.pressed]}
+            onPress={phase === 'paused' ? resume : pause}
+          >
+            <Text style={styles.pauseLabel}>{phase === 'paused' ? '▶' : '❚❚'}</Text>
+          </Pressable>
+        </View>
+      )}
 
       <Modal transparent visible={phase === 'over'} animationType="fade">
         <View style={styles.modalBackdrop}>
@@ -118,10 +139,13 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingBottom: 16,
   },
-  pauseCorner: {
+  cornerColumn: {
     position: 'absolute',
     top: 8,
     right: 12,
+    gap: 8,
+  },
+  cornerBtn: {
     width: 44,
     height: 44,
     borderRadius: 22,
