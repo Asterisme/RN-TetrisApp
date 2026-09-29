@@ -59,11 +59,7 @@ export function GameScreen() {
       </View>
 
       <View style={styles.controls}>
-        <TempControls
-          dispatch={dispatch}
-          paused={phase === 'paused'}
-          onPauseToggle={phase === 'paused' ? resume : pause}
-        />
+        <TempControls dispatch={dispatch} />
       </View>
 
       {phase === 'paused' && (
@@ -74,6 +70,14 @@ export function GameScreen() {
           </Pressable>
         </View>
       )}
+
+      {/* 右上角暂停/继续键：放在 overlay 之后渲染，暂停遮罩下仍可点按 */}
+      <Pressable
+        style={({ pressed }) => [styles.pauseCorner, phase === 'paused' && styles.pauseActive, pressed && styles.pressed]}
+        onPress={phase === 'paused' ? resume : pause}
+      >
+        <Text style={styles.pauseLabel}>{phase === 'paused' ? '▶' : '❚❚'}</Text>
+      </Pressable>
 
       <Modal transparent visible={phase === 'over'} animationType="fade">
         <View style={styles.modalBackdrop}>
@@ -113,6 +117,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 8,
     paddingBottom: 16,
+  },
+  pauseCorner: {
+    position: 'absolute',
+    top: 8,
+    right: 12,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(22, 35, 60, 0.9)',
+    borderColor: '#374151',
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pauseActive: {
+    borderColor: '#facc15',
+  },
+  pauseLabel: {
+    color: TEXT_MAIN,
+    fontSize: 17,
   },
   overlay: {
     position: 'absolute',

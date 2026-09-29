@@ -1,11 +1,12 @@
-// TempControls：手柄式控制区 —— 十字键（D-pad）+ 独立暂停键（Phase 4 手势的备用操控方式）
-// 十字布局：上=硬降(⤓) / 左=移动(◀) / 中=旋转(⟳) / 右=移动(▶) / 下=软降(▼)
+// TempControls：手柄式控制区 —— 十字键（D-pad）+ 右侧独立旋转键
+// 十字布局：上=硬降(⤓) / 左=移动(◀) / 右=移动(▶) / 下=软降(▼)；旋转(⟳)在右侧圆键
+// 暂停键在屏幕右上角（GameScreen 内），不在此组件
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Command } from '@engine/types';
 import { BOARD_BORDER, TEXT_MAIN } from './colors';
 
-const BTN = 64; // 单键尺寸（十字区 3×3 网格，中心臂 5 键）
+const BTN = 64; // 单键尺寸（十字区 3×3 网格）
 
 interface Cell {
   row: number;
@@ -18,18 +19,15 @@ interface Cell {
 const DPAD: Cell[] = [
   { row: 0, col: 1, label: '⤓', cmd: 'hardDrop', accent: true },
   { row: 1, col: 0, label: '◀', cmd: 'left' },
-  { row: 1, col: 1, label: '⟳', cmd: 'rotate' },
   { row: 1, col: 2, label: '▶', cmd: 'right' },
   { row: 2, col: 1, label: '▼', cmd: 'softDrop' },
 ];
 
 interface Props {
   dispatch: (cmd: Command) => void;
-  paused: boolean;
-  onPauseToggle: () => void;
 }
 
-export function TempControls({ dispatch, paused, onPauseToggle }: Props) {
+export function TempControls({ dispatch }: Props) {
   return (
     <View style={styles.row}>
       <View style={styles.dpad}>
@@ -55,10 +53,10 @@ export function TempControls({ dispatch, paused, onPauseToggle }: Props) {
       </View>
 
       <Pressable
-        style={({ pressed }) => [styles.pause, paused && styles.pauseActive, pressed && styles.pressed]}
-        onPress={onPauseToggle}
+        style={({ pressed }) => [styles.rotate, pressed && styles.pressed]}
+        onPress={() => dispatch('rotate')}
       >
-        <Text style={styles.label}>{paused ? '▶' : '❚❚'}</Text>
+        <Text style={styles.label}>⟳</Text>
       </Pressable>
     </View>
   );
@@ -89,6 +87,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#b45309',
     borderColor: '#ea580c',
   },
+  rotate: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#16233c',
+    borderColor: '#2563eb',
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   pressed: {
     opacity: 0.55,
   },
@@ -98,18 +106,5 @@ const styles = StyleSheet.create({
   },
   accentLabel: {
     color: '#fff',
-  },
-  pause: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#16233c',
-    borderColor: BOARD_BORDER,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pauseActive: {
-    borderColor: '#facc15',
   },
 });
