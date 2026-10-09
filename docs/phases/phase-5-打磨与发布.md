@@ -1,6 +1,6 @@
 # Phase 5 — 打磨与发布
 
-> 状态：⬜ 未开始 · 对应里程碑：M5（发布就绪）
+> 状态：🔄 进行中（2026-09-30：动效/图标/配置完成，EAS 构建被执行环境故障阻塞） · 对应里程碑：M5（发布就绪）
 
 ---
 
@@ -89,19 +89,46 @@ eas build --platform ios --profile preview       # 模拟器 build（免开发�
 
 | # | 任务 | 完成日期 | 验证方式 | 备注 |
 |---|---|---|---|---|
-| | | | | |
+| 1 | 消行闪烁动画 | 2026-09-30 | typecheck + 45 测试全绿 | 引擎动画锁 220ms（useGameEngine 冻结 update，输入照常入队），渲染层在消行前棋盘上播白色横条两轮闪烁，解锁后自动展示消行后棋盘 |
+| 2 | 引擎事件接线 | 2026-09-30 | typecheck + 测试 | locked 事件新增 piece 字段（供闪白定位），engine.test 断言同步更新 |
+| 3 | 锁块闪白 + Game Over 灰化 | 2026-09-30 | typecheck | 锁定方块位置白色叠加 120ms 淡出；phase=over 时棋盘整体 50% 透明 |
+| 4 | Skia 迁移评估 | 2026-09-30 | 结论记录 | **不迁移**：用户未报告可感知掉帧；View 矩阵 200 节点在 Fabric 下渲染压力低；无量化数据不承担迁移成本。若后续低端机掉帧再评估 |
+| 5 | App 图标 + 启动屏 | 2026-09-30 | sips 尺寸核对 | ImageGen 生成 1024×1024 扁平四色方块图标 → icon.png / adaptive-icon 前景 / splash 400×400 / favicon 48×48；app.json 更新（name=RN Tetris、深色 UI、splash 深蓝底、bundleIdentifier/package=com.asterisme.rntetris） |
+| 6 | eas.json | 2026-09-30 | - | preview profile：android apk + ios simulator |
+| 7 | EAS Build 双端产物 | - | **被阻塞** | 三次尝试均被本机 WorkBuddy 文件代理 shim 拦截（EPIPE/broker deny/SIGTERM），见问题表；待环境恢复后执行 §9 命令 |
+| 8 | 性能验证（双端真机 3 局） | - | **待用户执行** | 快速软降/消行动画期间无可感知掉帧、输入不丢 |
+| 9 | 产物双端安装冒烟 | - | **待用户执行** | apk 装机走完整流程 |
 
 ## 7. 问题与解决方案记录
 
 | 日期 | 问题症状 | 根因 | 解决方案 | 状态 |
 |---|---|---|---|---|
-| | | | | |
+| 2026-09-30 | eas-cli / expo start 等**长驻 node 进程**随机崩溃：`Broker request outcome unknown: write EPIPE`、`ECONNREFUSED broker.sock`、`CODEBUDDY_BROKER_DENY`（npm 缓存 rename 被拒）、部分命令 SIGTERM(137) | 本机 WorkBuddy 注入的 node 文件代理 shim（node-brokered-fs-shim.cjs）对长时运行进程/网络型 npm 操作不稳定 | 短命令走非沙箱模式可过；EAS 构建改为用户在本机终端手动执行（命令见 §9） | ⏳ 待环境恢复 |
+| 2026-09-30 | 引擎测试耗时 4.6 分钟（ts-jest 变慢） | 机器负载 + 覆盖率插桩 | 功能性结果不受影响；如需提速可迁移 vitest（暂不做） | 📝 已记录 |
 
 ## 8. 遗留想法（不进当前版本）
 
 -
 
-## 9. 阶段验收（对应 M5 检查清单）
+## 9. 环境恢复后的收尾命令（用户执行）
+
+```bash
+cd /Users/huanghua/Projects/tetris-app
+
+# 1. 提交 Phase 5 动效与发布配置
+git add -A
+git commit -m "feat(phase-5): 消行动画+锁块闪白+Game Over灰化+图标启动屏+EAS配置"
+git push
+
+# 2. 发起双端云构建（EAS 免费额度，Android 约 10-20 分钟）
+npx eas-cli build --platform android --profile preview   # 产出 .apk
+npx eas-cli build --platform ios --profile preview       # 产出模拟器包
+# 构建完成后在 https://expo.dev 上 voltman 账号的项目页下载产物
+
+# 3. Android 冒烟：安装 apk → 开局→消行（看闪烁动画）→暂停→Game Over→重开
+```
+
+## 10. 阶段验收（对应 M5 检查清单）
 
 - [ ] 逐项核对 MILESTONES.md 中 M5 的全部验收标准
 - [ ] 已更新 PROJECT.md §6 阶段状态 + §8 环境与运行

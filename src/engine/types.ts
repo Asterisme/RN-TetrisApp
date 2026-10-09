@@ -27,7 +27,7 @@ export type Phase = 'ready' | 'playing' | 'paused' | 'over';
 
 /** 引擎事件：update/dispatch 的返回值，供渲染层驱动动画与音效 */
 export type EngineEvent =
-  | { type: 'locked'; clearedRows: number[]; gained: number }
+  | { type: 'locked'; clearedRows: number[]; gained: number; piece: Piece }
   | { type: 'hardDropped'; cells: number }
   | { type: 'levelUp'; level: number }
   | { type: 'over' };

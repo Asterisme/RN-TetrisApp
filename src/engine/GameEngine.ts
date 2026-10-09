@@ -165,7 +165,7 @@ export class GameEngine {
     const gained = lineScore(clearedRows.length, this.level);
     this.score += gained;
 
-    const events: EngineEvent[] = [{ type: 'locked', clearedRows, gained }];
+    const events: EngineEvent[] = [{ type: 'locked', clearedRows, gained, piece: p }];
     const nl = nextLevel(this.lines);
     if (nl > this.level) {
       this.level = nl;

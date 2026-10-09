@@ -60,7 +60,9 @@ describe('GameEngine（状态机与命令）', () => {
     expect(engine.level).toBe(2);
     expect(engine.score).toBe(22 * 2 + 100 * 1); // 硬降 44 + 消行 100
     expect(events.some((e) => e.type === 'hardDropped' && e.cells === 22)).toBe(true);
-    expect(events.some((e) => e.type === 'locked' && e.clearedRows.length === 1)).toBe(true);
+    const locked = events.find((e) => e.type === 'locked');
+    expect(locked && 'clearedRows' in locked && locked.clearedRows.length === 1).toBe(true);
+    expect(locked && 'piece' in locked && locked.piece.type === 'O').toBe(true);
     expect(events.some((e) => e.type === 'levelUp' && e.level === 2)).toBe(true);
   });
 

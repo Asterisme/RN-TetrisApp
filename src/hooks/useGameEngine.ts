@@ -1,12 +1,25 @@
 // useGameEngine：rAF 固定步长循环 + 引擎↔Store 快照同步（脏检查跳过无变化帧）
+// 消行动画锁：cleared 事件触发后 220ms 内暂停引擎时间推进（输入照常入队），
+// 渲染层在"消行前"的棋盘上播闪烁，解锁后下一帧 sync 自动展示消行后的棋盘。
 import { useCallback, useEffect, useRef } from 'react';
+import { BUFFER } from '@engine/constants';
 import type { Command, EngineEvent } from '@engine/types';
 import { saveHighScore } from '../utils/storage';
 import { gameEngine } from '../store/engine';
 import { useGameStore } from '../store/gameStore';
 
+const CLEAR_ANIM_MS = 220;
+
 export function useGameEngine() {
   const setSnapshot = useGameStore((s) => s.setSnapshot);
+  const setClearing = useGameStore((s) => s.setClearing);
+  const setLockFlash = useGameStore((s) => s.setLockFlash);
+
+  const animLockUntil = useRef(0);
+  const clearToken = useRef(0);
+  const flashToken = useRef(0);
+
+  const prev = useRef({ board: null as unknown, current: null as unknown, key: '' });
 
   const sync = useCallback(() => {
     const snap = gameEngine.getSnapshot();
@@ -19,11 +32,21 @@ export function useGameEngine() {
     setSnapshot(snap, ghostY);
   }, [setSnapshot]);
 
-  const prev = useRef({ board: null as unknown, current: null as unknown, key: '' });
-
   const handleEvents = useCallback(
     (events: EngineEvent[]) => {
       for (const e of events) {
+        if (e.type === 'locked') {
+          if (e.clearedRows.length > 0) {
+            // 消行：冻结引擎推进 220ms，渲染层在消行前棋盘上闪烁对应行
+            animLockUntil.current = performance.now() + CLEAR_ANIM_MS;
+            clearToken.current += 1;
+            setClearing({ rows: e.clearedRows.map((r) => r - BUFFER), token: clearToken.current });
+          } else {
+            // 普通锁定：锁块闪白（不冻结，纯叠加动画）
+            flashToken.current += 1;
+            setLockFlash({ piece: e.piece, token: flashToken.current });
+          }
+        }
         if (e.type === 'over') {
           // 游戏结束：刷新本地最高分并落盘（存储失败静默降级）
           const { score, highScore, setHighScore } = useGameStore.getState();
@@ -34,8 +57,10 @@ export function useGameEngine() {
         }
       }
     },
-    [],
+    [setClearing, setLockFlash],
   );
+
+  const animating = useCallback(() => performance.now() < animLockUntil.current, []);
 
   useEffect(() => {
     let raf = 0;
@@ -43,21 +68,25 @@ export function useGameEngine() {
     const loop = (t: number) => {
       const dt = Math.min(t - last, 100); // 钳制：后台恢复防跳帧
       last = t;
-      const events = gameEngine.update(dt);
-      if (events.length) handleEvents(events);
-      sync();
+      if (!animating()) {
+        const events = gameEngine.update(dt);
+        if (events.length) handleEvents(events);
+        sync();
+      }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [sync, handleEvents]);
+  }, [sync, handleEvents, animating]);
 
   const start = useCallback(() => {
+    animLockUntil.current = 0;
     gameEngine.start();
     sync();
   }, [sync]);
 
   const restart = useCallback(() => {
+    animLockUntil.current = 0;
     gameEngine.reset();
     gameEngine.start();
     sync();
@@ -77,9 +106,10 @@ export function useGameEngine() {
     (cmd: Command) => {
       const events = gameEngine.dispatch(cmd);
       if (events.length) handleEvents(events);
-      sync();
+      // 动画期间不 sync：保持消行前画面，解锁后循环自动补一次 sync
+      if (!animating()) sync();
     },
-    [sync, handleEvents],
+    [sync, handleEvents, animating],
   );
 
   return { start, restart, pause, resume, dispatch };

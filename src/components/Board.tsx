@@ -1,6 +1,6 @@
-// Board：可见区棋盘（View 矩阵）+ 当前方块 + 幽灵方块 三层叠加
-import React, { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+// Board：可见区棋盘（View 矩阵）+ 当前方块 + 幽灵 + 消行闪烁 + 锁块闪白
+import React, { useEffect, useMemo, useRef } from 'react';
+import { Animated, StyleSheet, View } from 'react-native';
 import { BUFFER, COLS, ROWS } from '@engine/constants';
 import { useGameStore } from '../store/gameStore';
 import { useSettingsStore } from '../store/settingsStore';
@@ -18,7 +18,30 @@ export function Board({ cell }: { cell: number }) {
   const board = useGameStore((s) => s.board);
   const current = useGameStore((s) => s.current);
   const ghostY = useGameStore((s) => s.ghostY);
+  const phase = useGameStore((s) => s.phase);
+  const clearing = useGameStore((s) => s.clearing);
+  const lockFlash = useGameStore((s) => s.lockFlash);
   const ghostEnabled = useSettingsStore((s) => s.ghostEnabled);
+
+  // ---- 消行闪烁：白色横条在对应行上闪两轮（~220ms）----
+  const clearAnim = useRef(new Animated.Value(1)).current;
+  useEffect(() => {
+    if (!clearing || clearing.rows.length === 0) return;
+    clearAnim.setValue(1);
+    Animated.sequence([
+      Animated.timing(clearAnim, { toValue: 0.1, duration: 70, useNativeDriver: true }),
+      Animated.timing(clearAnim, { toValue: 0.9, duration: 55, useNativeDriver: true }),
+      Animated.timing(clearAnim, { toValue: 0.1, duration: 70, useNativeDriver: true }),
+    ]).start();
+  }, [clearing, clearAnim]);
+
+  // ---- 锁块闪白：锁定方块位置白色叠加淡出（~120ms）----
+  const flashAnim = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!lockFlash) return;
+    flashAnim.setValue(1);
+    Animated.timing(flashAnim, { toValue: 0, duration: 120, useNativeDriver: true }).start();
+  }, [lockFlash, flashAnim]);
 
   const visible = useMemo(() => board.slice(BUFFER, BUFFER + ROWS), [board]);
 
@@ -43,8 +66,23 @@ export function Board({ cell }: { cell: number }) {
     return cells;
   }, [current, ghostY, ghostEnabled]);
 
+  const flashCells = useMemo<OverlayCell[]>(() => {
+    if (!lockFlash) return [];
+    const cells: OverlayCell[] = [];
+    lockFlash.piece.matrix.forEach((row, dy) => {
+      row.forEach((v, dx) => {
+        if (!v) return;
+        const by = lockFlash.piece.y + dy - BUFFER;
+        if (by >= 0) {
+          cells.push({ key: `f${dy}-${dx}`, x: lockFlash.piece.x + dx, y: by, color: '#ffffff', ghost: false });
+        }
+      });
+    });
+    return cells;
+  }, [lockFlash]);
+
   return (
-    <View style={[styles.frame, { width: COLS * cell + 2, height: ROWS * cell + 2 }]}>
+    <View style={[styles.frame, { width: COLS * cell + 2, height: ROWS * cell + 2, opacity: phase === 'over' ? 0.5 : 1 }]}>
       {visible.map((row, y) =>
         row.map((c, x) => (
           <View
@@ -78,6 +116,28 @@ export function Board({ cell }: { cell: number }) {
           ]}
         />
       ))}
+      {/* 锁块闪白层 */}
+      {flashCells.length > 0 && (
+        <Animated.View style={[styles.animLayer, { opacity: flashAnim }]} pointerEvents="none">
+          {flashCells.map((o) => (
+            <View
+              key={o.key}
+              style={[styles.cell, { left: o.x * cell + 1, top: o.y * cell + 1, width: cell - 1, height: cell - 1, backgroundColor: '#fff' }]}
+            />
+          ))}
+        </Animated.View>
+      )}
+      {/* 消行闪烁层 */}
+      {clearing && clearing.rows.length > 0 && (
+        <Animated.View style={[styles.animLayer, { opacity: clearAnim }]} pointerEvents="none">
+          {clearing.rows.map((y) => (
+            <View
+              key={`clear-${y}`}
+              style={[styles.clearRow, { top: y * cell + 1, height: cell - 1 }]}
+            />
+          ))}
+        </Animated.View>
+      )}
     </View>
   );
 }
@@ -92,6 +152,20 @@ const styles = StyleSheet.create({
   },
   cell: {
     position: 'absolute',
+    borderRadius: 2,
+  },
+  animLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  clearRow: {
+    position: 'absolute',
+    left: 1,
+    right: 1,
+    backgroundColor: '#ffffff',
     borderRadius: 2,
   },
 });
