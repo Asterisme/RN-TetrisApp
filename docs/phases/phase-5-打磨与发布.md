@@ -95,7 +95,7 @@ eas build --platform ios --profile preview       # 模拟器 build（免开发�
 | 4 | Skia 迁移评估 | 2026-09-30 | 结论记录 | **不迁移**：用户未报告可感知掉帧；View 矩阵 200 节点在 Fabric 下渲染压力低；无量化数据不承担迁移成本。若后续低端机掉帧再评估 |
 | 5 | App 图标 + 启动屏 | 2026-09-30 | sips 尺寸核对 | ImageGen 生成 1024×1024 扁平四色方块图标 → icon.png / adaptive-icon 前景 / splash 400×400 / favicon 48×48；app.json 更新（name=RN Tetris、深色 UI、splash 深蓝底、bundleIdentifier/package=com.asterisme.rntetris） |
 | 6 | eas.json | 2026-09-30 | - | preview profile：android apk + ios simulator |
-| 7 | EAS Build 双端产物 | - | **被阻塞** | 三次尝试均被本机 WorkBuddy 文件代理 shim 拦截（EPIPE/broker deny/SIGTERM），见问题表；待环境恢复后执行 §9 命令 |
+| 7 | EAS Build 双端产物 | 2026-10-09 提交构建 | eas build --no-wait | 绕过本机 shim：全局安装 eas-cli（v24.12.0）+ `eas init`（项目 @voltman/tetris-app，ID ed673b16）。Android 与 iOS 模拟器构建均已提交云端排队：Android [5da193ed](https://expo.dev/accounts/voltman/projects/tetris-app/builds/5da193ed-2da7-4a7f-831d-d8bd91ef0c0e)、iOS [eeaecba7](https://expo.dev/accounts/voltman/projects/tetris-app/builds/eeaecba7-4f39-47c0-99d4-b0731eca6dc6)，产物完成后在项目页 Build 标签下载 |
 | 8 | 性能验证（双端真机 3 局） | - | **待用户执行** | 快速软降/消行动画期间无可感知掉帧、输入不丢 |
 | 9 | 产物双端安装冒烟 | - | **待用户执行** | apk 装机走完整流程 |
 

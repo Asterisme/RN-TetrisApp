@@ -91,7 +91,7 @@
 - [ ] 消行闪烁动画（~200ms）双端流畅，动画期间不阻塞输入（✅ 代码完成：引擎动画锁 220ms + 渲染层两轮闪烁，待真机确认流畅度）
 - [ ] 性能验证：双端真机连续 3 局无可感知掉帧；必要时已完成 Skia 迁移评估并记录结论（✅ 评估结论：不迁移，理由见 phase-5 文档；真机验证待执行）
 - [x] App 图标 + 启动屏配置完成
-- [ ] `eas build` 产出 iOS（.ipa/simulator build）与 Android（.apk）产物（⏳ 配置就绪，构建命令待执行：本机文件代理 shim 拦截长驻进程，见 phase-5 文档 §7/§9）
+- [ ] `eas build` 产出 iOS（.ipa/simulator build）与 Android（.apk）产物（✅ 双端已提交云端构建 2026-10-09，产物在 [项目页](https://expo.dev/accounts/voltman/projects/tetris-app/builds) Build 标签下载）
 - [ ] 产物在对应平台安装后通过冒烟测试（开局→消行→Game Over→重开）
 - [ ] PROJECT.md / MILESTONES.md / 全部阶段文档与实际状态一致（终检）
 
