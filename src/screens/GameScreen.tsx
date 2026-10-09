@@ -85,14 +85,14 @@ export function GameScreen() {
       {/* 右上角竖排：⚙设置（游戏中打开并自动暂停）+ ❚❚暂停/继续；置于遮罩之上可点按 */}
       {phase !== 'over' && (
         <View style={styles.cornerColumn}>
-          <Pressable
+          {/* <Pressable
             style={({ pressed }) => [styles.cornerBtn, pressed && styles.pressed]}
             onPress={openSettings}
           >
             <Text style={styles.pauseLabel}>⚙</Text>
-          </Pressable>
+          </Pressable> */}
           <Pressable
-            style={({ pressed }) => [styles.cornerBtn, phase === 'paused' && styles.pauseActive, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.cornerBtn, styles.pauseGap, phase === 'paused' && styles.pauseActive, pressed && styles.pressed]}
             onPress={phase === 'paused' ? resume : pause}
           >
             <Text style={styles.pauseLabel}>{phase === 'paused' ? '▶' : '❚❚'}</Text>
@@ -144,6 +144,9 @@ const styles = StyleSheet.create({
     top: 8,
     right: 12,
     gap: 8,
+  },
+  pauseGap: {
+    marginTop: 14,
   },
   cornerBtn: {
     width: 44,
