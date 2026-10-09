@@ -25,6 +25,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ed673b16-ea1e-4f3d-a75f-3b92a19c79ef"
+      }
+    },
+    "owner": "voltman"
   }
 }
