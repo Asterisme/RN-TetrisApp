@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GameScreen } from './src/screens/GameScreen';
 import { useSettingsStore } from './src/store/settingsStore';
+import { SHELL_BG } from './src/components/colors';
 
 export default function App() {
   const loadSettings = useSettingsStore((s) => s.load);
@@ -18,7 +19,7 @@ export default function App() {
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
         <GameScreen />
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
@@ -27,6 +28,6 @@ export default function App() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#0b1220',
+    backgroundColor: SHELL_BG,
   },
 });

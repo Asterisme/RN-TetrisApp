@@ -1,4 +1,4 @@
-// HUD：分数 / 等级 / 行数 / 最高分（字段级精确订阅，数字变化不引起棋盘重渲染）
+// HUD：紧凑横排（分数/等级/行数/最高分），字段级精确订阅，数字变化不引起棋盘重渲染
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useGameStore } from '../store/gameStore';
@@ -22,7 +22,7 @@ export function HUD() {
   return (
     <View style={styles.hud}>
       <Stat label="SCORE" value={score} />
-      <Stat label="LEVEL" value={level} />
+      <Stat label="LV" value={level} />
       <Stat label="LINES" value={lines} />
       <Stat label="BEST" value={Math.max(highScore, score)} />
     </View>
@@ -31,20 +31,21 @@ export function HUD() {
 
 const styles = StyleSheet.create({
   hud: {
+    flexDirection: 'row',
     gap: 14,
-    minWidth: 90,
+    flexWrap: 'wrap',
   },
   stat: {
-    gap: 2,
+    gap: 1,
   },
   label: {
     color: TEXT_DIM,
-    fontSize: 11,
-    letterSpacing: 1,
+    fontSize: 9,
+    letterSpacing: 0.5,
   },
   value: {
     color: TEXT_MAIN,
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: '500',
     fontVariant: ['tabular-nums'],
   },

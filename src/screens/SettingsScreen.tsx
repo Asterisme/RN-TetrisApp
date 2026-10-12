@@ -1,9 +1,9 @@
-// SettingsScreen：幽灵方块开关 + 手势灵敏度（改动即持久化）
+// SettingsScreen：幽灵方块开关 + 手势灵敏度（改动即持久化，掌机黄壳风格）
 import React from 'react';
 import { Pressable, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSettingsStore, type Sensitivity } from '../store/settingsStore';
-import { BOARD_BORDER, SCREEN_BG, TEXT_DIM, TEXT_MAIN } from '../components/colors';
+import { SHELL_BG, SHELL_SHADOW, SHELL_TEXT } from '../components/colors';
 
 const SENSITIVITY_OPTIONS: { key: Sensitivity; label: string }[] = [
   { key: 'low', label: '低' },
@@ -67,7 +67,7 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: SCREEN_BG,
+    backgroundColor: SHELL_BG,
     paddingHorizontal: 16,
   },
   header: {
@@ -77,14 +77,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   back: {
-    color: '#60a5fa',
+    color: '#2f5fd0',
     fontSize: 16,
     width: 44,
   },
   title: {
-    color: TEXT_MAIN,
+    color: SHELL_TEXT,
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '600',
+    letterSpacing: 2,
   },
   group: {
     gap: 18,
@@ -94,11 +95,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#0f1a2e',
-    borderColor: BOARD_BORDER,
+    backgroundColor: '#fff7d6',
+    borderColor: '#8a6a00',
     borderWidth: 1,
     borderRadius: 12,
     padding: 14,
+    shadowColor: SHELL_SHADOW,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   rowText: {
     flex: 1,
@@ -106,12 +112,13 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   rowTitle: {
-    color: TEXT_MAIN,
+    color: SHELL_TEXT,
     fontSize: 15,
   },
   rowDesc: {
-    color: TEXT_DIM,
+    color: SHELL_TEXT,
     fontSize: 12,
+    opacity: 0.7,
   },
   options: {
     flexDirection: 'row',
@@ -122,22 +129,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     borderRadius: 10,
-    borderColor: BOARD_BORDER,
+    borderColor: '#8a6a00',
     borderWidth: 1,
-    backgroundColor: '#0f1a2e',
+    backgroundColor: '#fff7d6',
   },
   optionActive: {
-    borderColor: '#2563eb',
-    backgroundColor: '#12244a',
+    borderColor: '#2f5fd0',
+    backgroundColor: '#e3ebff',
   },
   pressed: {
     opacity: 0.7,
   },
   optionLabel: {
-    color: TEXT_DIM,
+    color: SHELL_TEXT,
     fontSize: 14,
   },
   optionLabelActive: {
-    color: TEXT_MAIN,
+    color: '#2f5fd0',
+    fontWeight: '600',
   },
 });

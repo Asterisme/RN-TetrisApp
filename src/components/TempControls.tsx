@@ -1,110 +1,200 @@
-// TempControls：手柄式控制区 —— 十字键（D-pad）+ 右侧独立旋转键
-// 十字布局：上=硬降(⤓) / 左=移动(◀) / 右=移动(▶) / 下=软降(▼)；旋转(⟳)在右侧圆键
-// 暂停键在屏幕右上角（GameScreen 内），不在此组件
+// TempControls：掌机控制区（参照经典掌机布局）
+// 上排功能键：暂停(P)绿 / 音效(S)绿 / 重玩(R)红；主控：左=大「掉落」蓝键，右=十字键（旋转/左移/右移/下移，键下带标签）
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Command } from '@engine/types';
-import { BOARD_BORDER, TEXT_MAIN } from './colors';
+import { BTN_BLUE, BTN_BLUE_BORDER, BTN_CAPTION, BTN_GREEN, BTN_GREEN_BORDER, BTN_RED, BTN_RED_BORDER, SHELL_SHADOW } from './colors';
 
-const BTN = 64; // 单键尺寸（十字区 3×3 网格）
+const BTN = 62; // 十字键尺寸
+const CAP_H = 16; // 键下文字标签高度
+
+const SHADOW = {
+  shadowColor: SHELL_SHADOW,
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 1,
+  shadowRadius: 4,
+  elevation: 4,
+};
 
 interface Cell {
   row: number;
   col: number;
   label: string;
+  caption: string;
   cmd: Command;
-  accent?: boolean;
 }
 
 const DPAD: Cell[] = [
-  { row: 0, col: 1, label: '⤓', cmd: 'hardDrop', accent: true },
-  { row: 1, col: 0, label: '◀', cmd: 'left' },
-  { row: 1, col: 2, label: '▶', cmd: 'right' },
-  { row: 2, col: 1, label: '▼', cmd: 'softDrop' },
+  { row: 0, col: 1, label: '⟳', caption: '旋转', cmd: 'rotate' },
+  { row: 1, col: 0, label: '◀', caption: '左移', cmd: 'left' },
+  { row: 1, col: 2, label: '▶', caption: '右移', cmd: 'right' },
+  { row: 2, col: 1, label: '▼', caption: '下移', cmd: 'softDrop' },
 ];
 
 interface Props {
   dispatch: (cmd: Command) => void;
+  paused: boolean;
+  onPauseToggle: () => void;
+  onRestart: () => void;
+  onSound: () => void;
 }
 
-export function TempControls({ dispatch }: Props) {
+export function TempControls({ dispatch, paused, onPauseToggle, onRestart, onSound }: Props) {
   return (
-    <View style={styles.row}>
-      <View style={styles.dpad}>
-        {DPAD.map((c) => (
+    <View style={styles.wrapper}>
+      {/* 功能键行：暂停 / 音效 / 重玩 */}
+      <View style={styles.funcRow}>
+        <View style={styles.funcWrap}>
           <Pressable
-            key={c.label}
-            style={({ pressed }) => [
-              styles.btn,
-              {
-                left: c.col * BTN + 1,
-                top: c.row * BTN + 1,
-                width: BTN - 2,
-                height: BTN - 2,
-              },
-              c.accent && styles.accentBtn,
-              pressed && styles.pressed,
-            ]}
-            onPress={() => dispatch(c.cmd)}
+            style={({ pressed }) => [styles.funcBtn, styles.pauseBtn, SHADOW, pressed && styles.pressed]}
+            onPress={onPauseToggle}
           >
-            <Text style={[styles.label, c.accent && styles.accentLabel]}>{c.label}</Text>
+            <Text style={styles.funcIcon}>{paused ? '▶' : '❚❚'}</Text>
           </Pressable>
-        ))}
+          <Text style={styles.caption}>{paused ? '继续' : '暂停'}</Text>
+        </View>
+        <View style={styles.funcWrap}>
+          <Pressable
+            style={({ pressed }) => [styles.funcBtn, styles.pauseBtn, SHADOW, pressed && styles.pressed]}
+            onPress={onSound}
+          >
+            <Text style={styles.funcIcon}>🔊</Text>
+          </Pressable>
+          <Text style={styles.caption}>音效</Text>
+        </View>
+        <View style={styles.funcWrap}>
+          <Pressable
+            style={({ pressed }) => [styles.funcBtn, styles.restartBtn, SHADOW, pressed && styles.pressed]}
+            onPress={onRestart}
+          >
+            <Text style={styles.funcIcon}>↻</Text>
+          </Pressable>
+          <Text style={styles.caption}>重玩</Text>
+        </View>
       </View>
 
-      <Pressable
-        style={({ pressed }) => [styles.rotate, pressed && styles.pressed]}
-        onPress={() => dispatch('rotate')}
-      >
-        <Text style={styles.label}>⟳</Text>
-      </Pressable>
+      {/* 主控行：大掉落键 + 十字键 */}
+      <View style={styles.mainRow}>
+        <View style={styles.dropWrap}>
+          <Pressable
+            style={({ pressed }) => [styles.dropBtn, SHADOW, pressed && styles.pressed]}
+            onPress={() => dispatch('hardDrop')}
+          >
+            <Text style={styles.iconLg}>⤓</Text>
+          </Pressable>
+          <Text style={styles.caption}>掉落</Text>
+        </View>
+
+        <View style={styles.dpad}>
+          {DPAD.map((c) => (
+            <View
+              key={c.caption}
+              style={{
+                position: 'absolute',
+                left: c.col * BTN,
+                top: c.row * (BTN + CAP_H),
+                width: BTN,
+                alignItems: 'center',
+              }}
+            >
+              <Pressable
+                style={({ pressed }) => [styles.btn, { width: BTN - 4, height: BTN - 4 }, SHADOW, pressed && styles.pressed]}
+                onPress={() => dispatch(c.cmd)}
+              >
+                <Text style={styles.icon}>{c.label}</Text>
+              </Pressable>
+              <Text style={styles.caption}>{c.caption}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
+  wrapper: {
+    alignItems: 'center',
+    gap: 6,
+    paddingBottom: 6,
+  },
+  funcRow: {
     flexDirection: 'row',
+    gap: 22,
+    alignSelf: 'flex-start',
+    paddingLeft: 30,
+  },
+  funcWrap: {
+    alignItems: 'center',
+  },
+  funcBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 40,
-    paddingBottom: 12,
+    borderWidth: 1,
+  },
+  pauseBtn: {
+    backgroundColor: BTN_GREEN,
+    borderColor: BTN_GREEN_BORDER,
+  },
+  restartBtn: {
+    backgroundColor: BTN_RED,
+    borderColor: BTN_RED_BORDER,
+  },
+  funcIcon: {
+    color: '#fff',
+    fontSize: 15,
+  },
+  mainRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    alignSelf: 'stretch',
+    paddingLeft: '9%',
+    paddingRight: '2%',
+  },
+  dropWrap: {
+    alignItems: 'center',
+  },
+  dropBtn: {
+    width: 88,
+    height: 88,
+    borderRadius: 44,
+    backgroundColor: BTN_BLUE,
+    borderColor: BTN_BLUE_BORDER,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconLg: {
+    color: '#fff',
+    fontSize: 30,
   },
   dpad: {
     width: BTN * 3,
-    height: BTN * 3,
+    height: 3 * (BTN + CAP_H),
   },
   btn: {
-    position: 'absolute',
-    borderRadius: 14,
-    backgroundColor: '#16233c',
-    borderColor: BOARD_BORDER,
+    borderRadius: 31,
+    backgroundColor: BTN_BLUE,
+    borderColor: BTN_BLUE_BORDER,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  accentBtn: {
-    backgroundColor: '#b45309',
-    borderColor: '#ea580c',
+  icon: {
+    color: '#fff',
+    fontSize: 22,
   },
-  rotate: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#16233c',
-    borderColor: '#2563eb',
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  caption: {
+    color: BTN_CAPTION,
+    fontSize: 10,
+    marginTop: 2,
+    textAlign: 'center',
   },
   pressed: {
     opacity: 0.55,
-  },
-  label: {
-    color: TEXT_MAIN,
-    fontSize: 24,
-  },
-  accentLabel: {
-    color: '#fff',
   },
 });

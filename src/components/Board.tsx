@@ -4,7 +4,7 @@ import { Animated, StyleSheet, View } from 'react-native';
 import { BUFFER, COLS, ROWS } from '@engine/constants';
 import { useGameStore } from '../store/gameStore';
 import { useSettingsStore } from '../store/settingsStore';
-import { BOARD_BORDER, CELL_EMPTY, PIECE_COLORS } from './colors';
+import { CELL_EMPTY, LCD_BG, PIECE_COLORS } from './colors';
 
 interface OverlayCell {
   key: string;
@@ -23,7 +23,7 @@ export function Board({ cell }: { cell: number }) {
   const lockFlash = useGameStore((s) => s.lockFlash);
   const ghostEnabled = useSettingsStore((s) => s.ghostEnabled);
 
-  // ---- 消行闪烁：白色横条在对应行上闪两轮（~220ms）----
+  // ---- 消行闪烁：白色横条在对应行上闪两轮后归零（~195ms）----
   const clearAnim = useRef(new Animated.Value(1)).current;
   useEffect(() => {
     if (!clearing || clearing.rows.length === 0) return;
@@ -31,8 +31,14 @@ export function Board({ cell }: { cell: number }) {
     Animated.sequence([
       Animated.timing(clearAnim, { toValue: 0.1, duration: 70, useNativeDriver: true }),
       Animated.timing(clearAnim, { toValue: 0.9, duration: 55, useNativeDriver: true }),
-      Animated.timing(clearAnim, { toValue: 0.1, duration: 70, useNativeDriver: true }),
-    ]).start();
+      Animated.timing(clearAnim, { toValue: 0, duration: 70, useNativeDriver: true }),
+    ]).start(() => {
+      // 动画结束：若无新一轮消行接管，清除状态让闪烁层卸载（避免残留半透明印记）
+      const cur = useGameStore.getState().clearing;
+      if (!cur || cur.token === clearing.token) {
+        useGameStore.getState().setClearing(null);
+      }
+    });
   }, [clearing, clearAnim]);
 
   // ---- 锁块闪白：锁定方块位置白色叠加淡出（~120ms）----
@@ -145,9 +151,7 @@ export function Board({ cell }: { cell: number }) {
 const styles = StyleSheet.create({
   frame: {
     alignSelf: 'center',
-    backgroundColor: CELL_EMPTY,
-    borderColor: BOARD_BORDER,
-    borderWidth: 1,
+    backgroundColor: LCD_BG,
     overflow: 'hidden',
   },
   cell: {
