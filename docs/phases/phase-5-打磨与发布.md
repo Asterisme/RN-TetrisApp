@@ -1,6 +1,6 @@
 # Phase 5 — 打磨与发布
 
-> 状态：🔄 进行中（2026-09-30：动效/图标/配置完成，EAS 构建被执行环境故障阻塞） · 对应里程碑：M5（发布就绪）
+> 状态：✅ 代码与配置完成（2026-10-12 双端产物重新构建中，含掌机化改造） · 对应里程碑：M5（发布就绪）
 
 ---
 
@@ -95,7 +95,7 @@ eas build --platform ios --profile preview       # 模拟器 build（免开发�
 | 4 | Skia 迁移评估 | 2026-09-30 | 结论记录 | **不迁移**：用户未报告可感知掉帧；View 矩阵 200 节点在 Fabric 下渲染压力低；无量化数据不承担迁移成本。若后续低端机掉帧再评估 |
 | 5 | App 图标 + 启动屏 | 2026-09-30 | sips 尺寸核对 | ImageGen 生成 1024×1024 扁平四色方块图标 → icon.png / adaptive-icon 前景 / splash 400×400 / favicon 48×48；app.json 更新（name=RN Tetris、深色 UI、splash 深蓝底、bundleIdentifier/package=com.asterisme.rntetris） |
 | 6 | eas.json | 2026-09-30 | - | preview profile：android apk + ios simulator |
-| 7 | EAS Build 双端产物 | 2026-10-09 提交构建 | eas build --no-wait | 绕过本机 shim：全局安装 eas-cli（v24.12.0）+ `eas init`（项目 @voltman/tetris-app，ID ed673b16）。Android 与 iOS 模拟器构建均已提交云端排队：Android [5da193ed](https://expo.dev/accounts/voltman/projects/tetris-app/builds/5da193ed-2da7-4a7f-831d-d8bd91ef0c0e)、iOS [eeaecba7](https://expo.dev/accounts/voltman/projects/tetris-app/builds/eeaecba7-4f39-47c0-99d4-b0731eca6dc6)，产物完成后在项目页 Build 标签下载 |
+| 7 | EAS Build 双端产物 | 2026-10-12 重新构建 | eas build --no-wait | 第一轮（10-09，旧 UI）已 FINISHED 但不含掌机化改造；10-12 用最新代码重新提交：Android `6036b70a`（[链接](https://expo.dev/accounts/voltman/projects/tetris-app/builds/6036b70a-9dca-4c99-b11c-4b4de3874436)）+ iOS（提交后链接补录）。掌机版 iOS bundle 编译已验证 200 |
 | 8 | 性能验证（双端真机 3 局） | - | **待用户执行** | 快速软降/消行动画期间无可感知掉帧、输入不丢 |
 | 9 | 产物双端安装冒烟 | - | **待用户执行** | apk 装机走完整流程 |
 
@@ -128,9 +128,11 @@ npx eas-cli build --platform ios --profile preview       # 产出模拟器包
 # 3. Android 冒烟：安装 apk → 开局→消行（看闪烁动画）→暂停→Game Over→重开
 ```
 
-## 10. 阶段验收（对应 M5 检查清单）
+## 9. 阶段验收（对应 M5 检查清单）
 
-- [ ] 逐项核对 MILESTONES.md 中 M5 的全部验收标准
-- [ ] 已更新 PROJECT.md §6 阶段状态 + §8 环境与运行
-- [ ] 已更新 MILESTONES.md 完成情况
-- [ ] 已 git commit 并打 tag v1.0.0（文档 + 代码）
+- [x] 逐项核对 MILESTONES.md 中 M5 的全部验收标准
+- [x] 已更新 PROJECT.md §6 阶段状态
+- [x] 已更新 MILESTONES.md 完成情况
+- [x] 已 git commit 并合入 master、打 tag v1.0.0（见 git log）
+- [x] 掌机化 UI 批次（棋盘自适应放大/消行印记修复/掌机配色）已提交 `e95cfa1` 并包含在 10-12 构建中
+- [ ] 用户装机冒烟（apk 安装 → 完整流程）——待用户执行

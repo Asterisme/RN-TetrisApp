@@ -167,7 +167,7 @@ tetris-app/
 | Phase 2 | [游戏引擎核心](./phases/phase-2-游戏引擎核心.md) | 纯 TS 引擎全量实现 + 单测 | M2 | ✅ 已完成 2026-09-24 |
 | Phase 3 | [状态桥与渲染壳](./phases/phase-3-状态桥与渲染壳.md) | Zustand + Board 渲染 + 临时按钮操控 | M3 | 🔄 代码完成，待视觉验收 |
 | Phase 4 | [手势交互与完整闭环](./phases/phase-4-手势交互与完整闭环.md) | 手势 + 暂停/恢复 + 最高分 + 双端适配 | M4 | 🔄 代码完成，待真机回归 |
-| Phase 5 | [打磨与发布](./phases/phase-5-打磨与发布.md) | 动效 + 性能验证 + EAS Build 双端产物 | M5 | 🔄 动效/图标/配置完成，EAS 构建待执行 |
+| Phase 5 | [打磨与发布](./phases/phase-5-打磨与发布.md) | 动效 + 性能验证 + EAS Build 双端产物 | M5 | ✅ 已完成 2026-10-12（装机冒烟待用户） |
 
 各阶段详细任务列表见对应阶段文档（`docs/phases/`）。
 
