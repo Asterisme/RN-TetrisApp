@@ -1,6 +1,6 @@
 // GameScreen：主游戏界面（掌机化布局：黄壳机身 + LCD 屏 + 底部控制区；v1 条件渲染，不引入导航库）
 import React, { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLS, ROWS } from '@engine/constants';
 import { useGameStore } from '../store/gameStore';
@@ -11,6 +11,7 @@ import { TempControls } from '../components/TempControls';
 import { TouchLayer } from '../components/TouchLayer';
 import { useGameEngine } from '../hooks/useGameEngine';
 import { useGameLifecycle } from '../hooks/useGameLifecycle';
+import { useKeyboardControls } from '../hooks/useKeyboardControls';
 import { SettingsScreen } from './SettingsScreen';
 import { LCD_FRAME, SHELL_BG, SHELL_DOTS, SHELL_SHADOW, SHELL_TEXT, TEXT_MAIN } from '../components/colors';
 
@@ -24,6 +25,7 @@ export function GameScreen() {
   const sensitivity = useSettingsStore((s) => s.sensitivity);
   const { start, restart, pause, resume, dispatch } = useGameEngine();
   useGameLifecycle(pause);
+  useKeyboardControls(dispatch, phase === 'playing'); // 网页版键盘操控（仅 Web 生效）
 
   const [view, setView] = useState<'menu' | 'settings'>('menu');
   const [playArea, setPlayArea] = useState({ w: 0, h: 0 });
@@ -55,6 +57,9 @@ export function GameScreen() {
             <Text style={styles.menuBtnGhostLabel}>设置</Text>
           </Pressable>
           <Text style={styles.hint}>点击旋转 · 左右滑移动 · 下滑软降 · 快滑硬降</Text>
+          {Platform.OS === 'web' && (
+            <Text style={styles.hint}>键盘：← → 移动 · ↓ 软降 · ↑ 旋转 · 空格 硬降</Text>
+          )}
         </View>
       </SafeAreaView>
     );
